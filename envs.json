@@ -1,0 +1,341 @@
+{
+    "wraps": {
+        "open-ssh-get-latest-version": {
+            "basedOn": [
+                {
+                    "name": "ubuntu-wget-install",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
+                    "name": "ubuntu-jq-install",
+                    "tag": "latest",
+                    "precreate": true
+                }
+            ],
+            "dockerfile": "./dockers/open-ssh/get-latest-version/Dockerfile",
+            "build": {
+                "context": "./dockers/open-ssh/get-latest-version"
+            },
+            "run": {
+                "volumes": [
+                    {
+                        "destination": "/working-env/open-ssh/configs",
+                        "source": "./dockers/open-ssh/get-latest-version/configs"
+                    }
+                ],
+                "entrypoint": {
+                    "tool": "bash",
+                    "args": [
+                        "-c"
+                    ],
+                    "commands": [
+                        "(source /working-env/open-ssh/main.sh && main)"
+                    ]
+                }
+            },
+            "clean": [
+                "(source ./env-scripts/not-by-wrap-name/install-some-util/clean.sh && main \"./dockers/open-ssh\" \"get-latest-version\")"
+            ]
+        },
+        "open-ssh-download-without-configs": {
+            "basedOn": {
+                "name": "ubuntu-wget-install",
+                "tag": "latest",
+                "precreate": true
+            },
+            "dockerfile": "./dockers/open-ssh/download/without-configs/Dockerfile",
+            "build": {
+                "context": "./dockers/open-ssh/download/without-configs"
+            },
+            "run": {
+                "volumes": [
+                    {
+                        "destination": "/working-env/open-ssh/download/saved",
+                        "source": "./dockers/open-ssh/install/saved-versions"
+                    }
+                ],
+                "entrypoint": {
+                    "tool": "bash",
+                    "args": [
+                        "-c"
+                    ],
+                    "commands": [
+                        "(source /working-env/open-ssh/download/main.sh && main)"
+                    ]
+                }
+            }
+        },
+        "open-ssh-download-with-configs": {
+            "basedOn": {
+                "name": "open-ssh-download-without-configs",
+                "tag": "latest",
+                "precreate": true
+            },
+            "dockerfile": "./dockers/open-ssh/download/with-configs/Dockerfile",
+            "build": {
+                "context": "./dockers/open-ssh/download/with-configs"
+            },
+            "clean": [
+                "(source ./env-scripts/not-by-wrap-name/install-some-util/clean.sh && main \"./dockers/open-ssh\" \"download\")"
+            ]
+        },
+        "open-ssh-install": {
+            "basedOn": {
+                "name": "ubuntu-with-latest-packages",
+                "tag": "latest",
+                "precreate": true
+            },
+            "dockerfile": "./dockers/open-ssh/install/Dockerfile",
+            "build": {
+                "context": "./dockers/open-ssh/install",
+                "options": [
+                    "--build-arg VERSION=\"$(source ./env-scripts/not-by-wrap-name/install-some-util/read-version.sh && main \"./dockers/open-ssh\")\"",
+                    "--build-arg CONFIGURE_OPTIONS=\"--prefix=/usr/local\""
+                ],
+                "run": {
+                    "before": [
+                        "(source ./env-scripts/open-ssh/install/prepare-before-build.sh && main \"\" \"linux\" \"./dockers/open-ssh\")"
+                    ],
+                    "after": [
+                        "(source \"./env-scripts/not-by-wrap-name/backups/make.sh\" && main \"$(./envs.sh get name image open-ssh-install)\")"
+                    ]
+                }
+            },
+            "clean": [
+                "(source \"./env-scripts/not-by-wrap-name/backups/clean.sh\" && main \"$(./envs.sh get name image open-ssh-install)\")",
+                "(source ./env-scripts/not-by-wrap-name/install-some-util/clean.sh && main \"./dockers/open-ssh\" \"install\")"
+            ]
+        },
+        "open-ssh-keys-creation-basic": {
+            "basedOn": [
+                {
+                    "name": "open-ssh-install",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
+                    "name": "ubuntu-jq-install",
+                    "tag": "latest",
+                    "precreate": true
+                }
+            ],
+            "dockerfile": "./dockers/open-ssh/keys-creation/basic/Dockerfile",
+            "build": {
+                "context": "./dockers/open-ssh/keys-creation/basic",
+                "run": {
+                    "before": [
+                        "(source ./env-scripts/open-ssh/keys-creation/make-keys-folder.sh && main \"./secrets\" \"open-ssh/keys\")"
+                    ]
+                }
+            },
+            "run": {
+                "volumes": [
+                    {
+                        "destination": "/working-env/open-ssh/keys-creation/basic/keys",
+                        "source": "./secrets/open-ssh/keys"
+                    }
+                ]
+            }
+        },
+        "open-ssh-keys-creation-interactive": {
+            "basedOn": [
+                {
+                    "name": "open-ssh-keys-creation-basic",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
+                    "name": "input-secrets",
+                    "tag": "latest",
+                    "precreate": true,
+                    "asAbstract": true
+                }
+            ],
+            "dockerfile": "./dockers/open-ssh/keys-creation/interactive/Dockerfile",
+            "build": {
+                "context": "./dockers/open-ssh/keys-creation/interactive"
+            },
+            "run": {
+                "entrypoint": {
+                    "tool": "bash",
+                    "args": [
+                        "-c"
+                    ],
+                    "commands": [
+                        "(source /working-env/open-ssh/keys-creation/interactive/main.sh && main)"
+                    ]
+                }
+            }
+        },
+        "open-ssh-create-sshd-user": {
+            "basedOn": [
+                {
+                    "name": "ubuntu-gnupg-install",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
+                    "name": "ubuntu-user-work",
+                    "tag": "latest",
+                    "precreate": true
+                }
+            ],
+            "dockerfile": "./dockers/open-ssh/create-sshd-user/Dockerfile",
+            "build": {
+                "context": "./dockers/open-ssh/create-sshd-user"
+            }
+        },
+        "open-ssh-add-public-keys": {
+            "basedOn": [
+                {
+                    "name": "ubuntu-jq-install",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
+                    "name": "ubuntu-gnupg-install",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
+                    "name": "ubuntu-user-work",
+                    "tag": "latest",
+                    "precreate": true
+                }
+            ],
+            "dockerfile": "./dockers/open-ssh/public-keys-add/Dockerfile",
+            "build": {
+                "context": "./dockers/open-ssh/public-keys-add",
+                "run": {
+                    "before": [
+                        "(source ./env-scripts/open-ssh/public-keys-add/move-files-to-config.sh && main \"./secrets/open-ssh/keys\" \"./dockers/open-ssh\")"
+                    ]
+                }
+            },
+            "clean": [
+                "(source ./env-scripts/open-ssh/public-keys-add/clean.sh && main \"./dockers/open-ssh\")"
+            ]
+        },
+        "open-ssh-sshd-basic": {
+            "basedOn": [
+                {
+                    "name": "open-ssh-install",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
+                    "name": "ubuntu-iproute2-install",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
+                    "name": "open-ssh-create-sshd-user",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
+                    "name": "open-ssh-add-public-keys",
+                    "tag": "latest",
+                    "precreate": true
+                }
+            ],
+            "dockerfile": "./dockers/open-ssh/sshd/basic/Dockerfile",
+            "build": {
+                "context": "./dockers/open-ssh/sshd/basic"
+            },
+            "run": {
+                "options": [
+                    "-p 2222:22"
+                ]
+            }
+        },
+        "open-ssh-sshd-interactive": {
+            "basedOn": {
+                "name": "open-ssh-sshd-basic",
+                "tag": "latest",
+                "precreate": true
+            },
+            "dockerfile": "./dockers/open-ssh/sshd/interactive/Dockerfile",
+            "build": {
+                "context": "./dockers/open-ssh/sshd/interactive"
+            },
+            "run": {
+                "interactive": true,
+                "entrypoint": {
+                    "tool": "bash",
+                    "args": [
+                        "-c"
+                    ],
+                    "commands": [
+                        "(source /working-env/open-ssh/sshd/interactive/main.sh && main)"
+                    ]
+                }
+            }
+        },
+        "open-ssh-connect-via-ssh-basic": {
+            "basedOn": [
+                {
+                   "name": "open-ssh-install",
+                   "tag": "latest",
+                   "precreate": true
+                },
+                {
+                    "name": "ubuntu-jq-install",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
+                    "name": "ubuntu-expect-install",
+                    "tag": "latest",
+                    "precreate": true
+                }
+            ],
+            "dockerfile": "./dockers/open-ssh/connect-via-ssh/basic/Dockerfile",
+            "build": {
+                "context": "./dockers/open-ssh/connect-via-ssh/basic"
+            },
+            "run": {
+                "options": [
+                    "--network=host"
+                ],
+                "volumes": [
+                    {
+                        "destination": "/working-env/open-ssh/connect-via-ssh/basic/keys",
+                        "source": "./secrets/open-ssh/keys"
+                    }
+                ]
+            }
+        },
+        "open-ssh-connect-via-ssh-interactive": {
+            "basedOn": [
+                {
+                    "name": "open-ssh-connect-via-ssh-basic",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
+                    "name": "input-secrets",
+                    "tag": "latest",
+                    "precreate": true,
+                    "asAbstract": true
+                }
+            ],
+            "dockerfile": "./dockers/open-ssh/connect-via-ssh/interactive/Dockerfile",
+            "build": {
+                "context": "./dockers/open-ssh/connect-via-ssh/interactive"
+            },
+            "run": {
+                "entrypoint": {
+                    "tool": "bash",
+                    "args": [
+                        "-c"
+                    ],
+                    "commands": [
+                        "(source /working-env/open-ssh/connect-via-ssh/interactive/connect.sh && main)"
+                    ]
+                }
+            }
+        }
+    }
+}

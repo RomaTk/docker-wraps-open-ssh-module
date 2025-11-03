@@ -1,0 +1,8 @@
+/dockers/open-ssh/get-latest-version/configs
+/dockers/open-ssh/install/configs
+/dockers/open-ssh/install/saved-versions
+/dockers/open-ssh/download/with-configs/configs
+/dockers/open-ssh/public-keys-add/keys
+
+/dockers/open-ssh/open-ssh
+/env-scripts/open-ssh/open-ssh
