@@ -7,6 +7,10 @@ function main {
     local user
     local index
 
+    if [[ ! -f "./keys/keys-configuration.json" ]]; then
+        exit 0
+    fi
+
     array=$(cat ./keys/keys-configuration.json)
     if [ $? -ne 0 ]; then
         echo "Cannot read keys-configuration.json" >&2
