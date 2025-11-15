@@ -1,26 +1,5 @@
 #!/bin/bash
 
-function mainInteractive {
-    local key_name
-    local host
-    local additional_options
-    local port_number
-    local command_in_ssh
-
-    echo "Please select the key name"
-    read key_name
-    echo "Please select the host to connect to"
-    read host
-    echo "Please enter the port number to connect to (leave empty for default port 22):"
-    read port_number
-    echo "Please enter the additional SSH options (space-separated), or leave empty for none:"
-    read additional_options
-    echo "If there is a command to run on the remote host after connecting, please enter it now (or leave empty for none):"
-    read command_in_ssh
-
-    main "$key_name" "$host" "$port_number" "$additional_options" "$command_in_ssh" "true"
-}
-
 function main {
     local key_name="$1"
     local host="$2"
@@ -28,6 +7,7 @@ function main {
     local additional_options="$4"
     local command_in_ssh="$5"
     local is_interactive="$6"
+    local keys_folder="$7"
     local user_name
     local passphrase
     local script_folder
@@ -39,9 +19,19 @@ function main {
     local is_to_remove_key="true"
     local command
 
-    script_folder=$(dirname "${BASH_SOURCE[0]}")
+    if [ -z "$keys_folder" ]; then
+        script_folder=$(dirname "${BASH_SOURCE[0]}")
+        if [ $? -ne 0 ]; then
+            echo "Cannot get directory name of the current file: ${BASH_SOURCE[0]}" >&2
+            exit 1
+        fi
 
-    key_file="$script_folder/keys/$key_name"
+        keys_folder="$script_folder/keys"
+    fi
+
+    
+
+    key_file="$keys_folder/$key_name"
     if [ ! -f "$key_file" ]; then
         echo "Key file does not exist: $key_file" >&2
         exit 1
@@ -149,7 +139,7 @@ function main {
 
 function findUserName {
     local key_index_to_find="$1"
-    local file_path="$script_folder/keys/keys-configuration.json"
+    local file_path="$keys_folder/keys-configuration.json"
     local array
     local length
     local i
@@ -196,7 +186,7 @@ function findUserName {
 }
 
 function getPassphrase {
-    local file_path="$script_folder/keys/keys-passphrases.json"
+    local file_path="$keys_folder/keys-passphrases.json"
     local passphrase
 
     if [ ! -f "$file_path" ]; then
