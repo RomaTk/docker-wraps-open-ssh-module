@@ -19,13 +19,13 @@ function main {
     local is_to_remove_key="true"
     local command
 
-    if [ -z "$keys_folder" ]; then
-        script_folder=$(dirname "${BASH_SOURCE[0]}")
-        if [ $? -ne 0 ]; then
-            echo "Cannot get directory name of the current file: ${BASH_SOURCE[0]}" >&2
-            exit 1
-        fi
+    script_folder=$(dirname "${BASH_SOURCE[0]}")
+    if [ $? -ne 0 ]; then
+        echo "Cannot get directory name of the current file: ${BASH_SOURCE[0]}" >&2
+        exit 1
+    fi
 
+    if [ -z "$keys_folder" ]; then
         keys_folder="$script_folder/keys"
     fi
 
