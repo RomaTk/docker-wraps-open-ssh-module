@@ -24,6 +24,9 @@ function main {
     read additional_options
     echo "If there is a command to run on the remote host after connecting, please enter it now (or leave empty for none):"
     read command_in_ssh
+    echo "If there is a special folder for keys, please enter it now (or leave empty for default):"
+    read keys_folder
+
 
     source "$current_dir/config.cfg"
     [ $? -ne 0 ] && exit 1
@@ -33,7 +36,7 @@ function main {
         exit 1
     fi
 
-    (source "$BASIC_DIR/connect.sh" && main "$key_name" "$host" "$port_number" "$additional_options" "$command_in_ssh" "true")
+    (source "$BASIC_DIR/connect.sh" && main "$key_name" "$host" "$port_number" "$additional_options" "$command_in_ssh" "true" "$keys_folder")
     if [ $? -ne 0 ]; then
         echo "Error: Failed to execute basic connect script"
         exit 1

@@ -107,6 +107,15 @@
                 "(source ./env-scripts/not-by-wrap-name/install-some-util/clean.sh && main \"./dockers/open-ssh\" \"install\")"
             ]
         },
+        "open-ssh-folder-for-keys-create": {
+            "build": {
+                "run": {
+                    "before": [
+                        "(source ./env-scripts/open-ssh/keys-creation/make-keys-folder.sh && main \"./secrets\" \"open-ssh/keys\")"
+                    ]
+                }
+            }
+        },
         "open-ssh-keys-creation-basic": {
             "basedOn": [
                 {
@@ -118,16 +127,17 @@
                     "name": "ubuntu-jq-install",
                     "tag": "latest",
                     "precreate": true
+                },
+                {
+                    "name": "open-ssh-folder-for-keys-create",
+                    "tag": "latest",
+                    "precreate": true,
+                    "asAbstract": true
                 }
             ],
             "dockerfile": "./dockers/open-ssh/keys-creation/basic/Dockerfile",
             "build": {
-                "context": "./dockers/open-ssh/keys-creation/basic",
-                "run": {
-                    "before": [
-                        "(source ./env-scripts/open-ssh/keys-creation/make-keys-folder.sh && main \"./secrets\" \"open-ssh/keys\")"
-                    ]
-                }
+                "context": "./dockers/open-ssh/keys-creation/basic"
             },
             "run": {
                 "volumes": [
@@ -289,6 +299,12 @@
                     "name": "ubuntu-expect-install",
                     "tag": "latest",
                     "precreate": true
+                },
+                {
+                    "name": "open-ssh-folder-for-keys-create",
+                    "tag": "latest",
+                    "precreate": true,
+                    "asAbstract": true
                 }
             ],
             "dockerfile": "./dockers/open-ssh/connect-via-ssh/basic/Dockerfile",
