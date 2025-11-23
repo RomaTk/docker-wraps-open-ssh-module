@@ -119,12 +119,12 @@
         "open-ssh-keys-creation-basic": {
             "basedOn": [
                 {
-                    "name": "open-ssh-install",
+                    "name": "ubuntu-jq-install",
                     "tag": "latest",
                     "precreate": true
                 },
                 {
-                    "name": "ubuntu-jq-install",
+                    "name": "open-ssh-install",
                     "tag": "latest",
                     "precreate": true
                 },
@@ -220,22 +220,26 @@
                 "run": {
                     "before": [
                         "(source ./env-scripts/open-ssh/public-keys-add/move-files-to-config.sh && main \"./secrets/open-ssh/keys\" \"./dockers/open-ssh\")"
+                    ],
+                    "after": [
+                        "(source \"./env-scripts/not-by-wrap-name/backups/make.sh\" && main \"$(./envs.sh get name image open-ssh-add-public-keys)\")"
                     ]
                 }
             },
             "clean": [
-                "(source ./env-scripts/open-ssh/public-keys-add/clean.sh && main \"./dockers/open-ssh\")"
+                "(source ./env-scripts/open-ssh/public-keys-add/clean.sh && main \"./dockers/open-ssh\")",
+                "(source \"./env-scripts/not-by-wrap-name/backups/clean.sh\" && main \"$(./envs.sh get name image open-ssh-add-public-keys)\")"
             ]
         },
         "open-ssh-sshd-basic": {
             "basedOn": [
                 {
-                    "name": "open-ssh-install",
+                    "name": "ubuntu-iproute2-install",
                     "tag": "latest",
                     "precreate": true
                 },
                 {
-                    "name": "ubuntu-iproute2-install",
+                    "name": "open-ssh-install",
                     "tag": "latest",
                     "precreate": true
                 },
