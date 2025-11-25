@@ -111,12 +111,12 @@
             "build": {
                 "run": {
                     "before": [
-                        "(source ./env-scripts/open-ssh/keys-creation/make-keys-folder.sh && main \"./secrets\" \"open-ssh/keys\")"
+                        "(source ./env-scripts/open-ssh/keys-work/make-keys-folder.sh && main \"./secrets\" \"open-ssh/keys\")"
                     ]
                 }
             }
         },
-        "open-ssh-keys-creation-basic": {
+        "open-ssh-keys-work-basic": {
             "basedOn": [
                 {
                     "name": "ubuntu-jq-install",
@@ -135,23 +135,23 @@
                     "asAbstract": true
                 }
             ],
-            "dockerfile": "./dockers/open-ssh/keys-creation/basic/Dockerfile",
+            "dockerfile": "./dockers/open-ssh/keys-work/basic/Dockerfile",
             "build": {
-                "context": "./dockers/open-ssh/keys-creation/basic"
+                "context": "./dockers/open-ssh/keys-work/basic"
             },
             "run": {
                 "volumes": [
                     {
-                        "destination": "/working-env/open-ssh/keys-creation/basic/keys",
+                        "destination": "/working-env/open-ssh/keys-work/basic/keys",
                         "source": "./secrets/open-ssh/keys"
                     }
                 ]
             }
         },
-        "open-ssh-keys-creation-interactive": {
+        "open-ssh-keys-work-interactive": {
             "basedOn": [
                 {
-                    "name": "open-ssh-keys-creation-basic",
+                    "name": "open-ssh-keys-work-basic",
                     "tag": "latest",
                     "precreate": true
                 },
@@ -162,9 +162,9 @@
                     "asAbstract": true
                 }
             ],
-            "dockerfile": "./dockers/open-ssh/keys-creation/interactive/Dockerfile",
+            "dockerfile": "./dockers/open-ssh/keys-work/interactive/Dockerfile",
             "build": {
-                "context": "./dockers/open-ssh/keys-creation/interactive"
+                "context": "./dockers/open-ssh/keys-work/interactive"
             },
             "run": {
                 "entrypoint": {
@@ -173,7 +173,7 @@
                         "-c"
                     ],
                     "commands": [
-                        "(source /working-env/open-ssh/keys-creation/interactive/main.sh && main)"
+                        "(source /working-env/open-ssh/keys-work/interactive/main.sh && main)"
                     ]
                 }
             }

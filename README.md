@@ -13,8 +13,8 @@ After that you will have the following wraps available:
 - `open-ssh-download-without-configs`
 - `open-ssh-download-with-configs`
 - `open-ssh-install`
-- `open-ssh-keys-creation-basic`
-- `open-ssh-keys-creation-interactive`
+- `open-ssh-keys-work-basic`
+- `open-ssh-keys-work-interactive`
 - `open-ssh-create-sshd-user`
 - `open-ssh-add-public-keys`
 - `open-ssh-sshd-basic`
@@ -24,22 +24,22 @@ After that you will have the following wraps available:
 
 
 ## Creating keys
-You can create ssh keys using `open-ssh-keys-creation-interactive` wrap. Or using `open-ssh-keys-creation-basic` wrap if you want to provide all parameters in advance.
+You can create ssh keys using `open-ssh-keys-work-interactive` wrap. Or using `open-ssh-keys-work-basic` wrap if you want to provide all parameters in advance.
 
-There you can specify within `open-ssh-keys-creation-basic` wrap which folder is going to be used for creating keys and which folder will be used to store created keys.
+There you can specify within `open-ssh-keys-work-basic` wrap which folder is going to be used for creating keys and which folder will be used to store created keys.
 ```bash
-source ./env-scripts/open-ssh/keys-creation/make-keys-folder.sh && main "./secrets" "open-ssh/keys"
+source ./env-scripts/open-ssh/keys-work/make-keys-folder.sh && main "./secrets" "open-ssh/keys"
 ```
 And volume 
 ```JSON
 {
-    "destination": "/working-env/open-ssh/keys-creation/basic/keys",
+    "destination": "/working-env/open-ssh/keys-work/basic/keys",
     "source": "./secrets/open-ssh/keys"
 }
 ```
 
 ## Adding users to sshd
-Based on created keys you can create sshd users using `open-ssh-keys-creation-basic` wrap. You can use `open-ssh-add-public-keys` wrap to add public keys to authorized keys of created users.
+Based on created keys you can create sshd users using `open-ssh-keys-work-basic` wrap. You can use `open-ssh-add-public-keys` wrap to add public keys to authorized keys of created users.
 You need to specify what folder contains created keys, so public keys will be added to corresponding users.
 ```bash
 source ./env-scripts/open-ssh/public-keys-add/move-files-to-config.sh && main "./secrets/open-ssh/keys" "./dockers/open-ssh"
