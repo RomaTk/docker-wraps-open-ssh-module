@@ -8,7 +8,7 @@ function main {
     local current_file
     local current_dir
 
-    echo "Please enter user (comment):"
+    echo "Please enter user:"
     read user
     if [ -z "$user" ]; then
         echo "We do not allow empty user" >&2

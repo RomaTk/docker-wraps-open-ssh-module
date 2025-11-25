@@ -65,6 +65,8 @@ function main {
         exit 1
     fi
 
+    echo "$output"
+
     exit 0
 }
 

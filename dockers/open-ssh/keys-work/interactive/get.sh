@@ -7,7 +7,7 @@ function main {
     local current_dir
     local key_index
 
-    echo "Please enter user (comment):"
+    echo "Please enter user:"
     read user
     if [ -z "$user" ]; then
         echo "We do not allow empty user" >&2
