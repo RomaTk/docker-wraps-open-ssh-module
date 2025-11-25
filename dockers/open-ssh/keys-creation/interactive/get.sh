@@ -1,15 +1,13 @@
-#!/bin/bash
-
 function main {
     local user
-    local passphrase
     local comment
 
     local last_action
     local current_file
     local current_dir
+    local key_index
 
-    echo "Please enter user:"
+    echo "Please enter user (comment):"
     read user
     if [ -z "$user" ]; then
         echo "We do not allow empty user" >&2
@@ -18,13 +16,6 @@ function main {
 
     echo "Please enter comment (can be empty):"
     read comment
-
-    echo "Please enter passphrase:"
-    read -s passphrase
-    if [ -z "$passphrase" ]; then
-        echo "We do not allow empty passphrase" >&2
-        exit 1
-    fi
 
     current_file="${BASH_SOURCE[0]}"
     if [ -z "$current_file" ]; then
@@ -37,6 +28,7 @@ function main {
         echo "Cannot determine current directory" >&2
         exit 1
     fi
+    
 
     source "$current_dir/config.cfg"
     if [ $? -ne 0 ]; then
@@ -49,11 +41,13 @@ function main {
         exit 1
     fi
 
-    last_action=$(source "$BASIC_DIR/create.sh" && main "$user" "$comment" "$passphrase")
+    key_index=$(source "$BASIC_DIR/get.sh" && main "$user" "$comment")
     if [ $? -ne 0 ]; then
-        echo "Problem within create: $last_action" >&2
+        echo "Problem within get: $key_index" >&2
         exit 1
     fi
+
+    echo "Key index: $key_index"
 
     exit 0
 }

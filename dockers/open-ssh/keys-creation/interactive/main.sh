@@ -46,13 +46,13 @@ function main {
 
 function getAction {
     action=""
-    echo "Please provide action that you want to perform. create/remove/exit"
+    echo "Please provide action that you want to perform. create/remove/get/exit"
     read action
-    if [[ "$action" != "create" && "$action" != "remove" && "$action" != "exit" ]]; then
+    if [[ "$action" != "create" && "$action" != "remove" && "$action" != "get" && "$action" != "exit" ]]; then
         if [[ "$action" == "exit" ]]; then
             return 3
         fi
-        echo "Invalid action. Please specify 'create', 'remove' or 'exit'."
+        echo "Invalid action. Please specify 'create', 'remove', 'get' or 'exit'."
         action=""
         return 2
     fi

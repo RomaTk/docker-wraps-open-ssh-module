@@ -44,7 +44,7 @@ function main {
 
     last_action=$(source "$BASIC_DIR/remove.sh" && main "$user" "$comment")
     if [ $? -ne 0 ]; then
-        echo "Problem within removeWithFlock: $last_action" >&2
+        echo "Problem within remove: $last_action" >&2
         exit 1
     fi
 
