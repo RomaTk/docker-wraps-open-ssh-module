@@ -239,6 +239,16 @@
                     "precreate": true
                 },
                 {
+                    "name": "ubuntu-jq-install",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
+                    "name": "ubuntu-gnupg-install",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
                     "name": "open-ssh-install",
                     "tag": "latest",
                     "precreate": true
@@ -290,11 +300,6 @@
         "open-ssh-connect-via-ssh-basic": {
             "basedOn": [
                 {
-                   "name": "open-ssh-install",
-                   "tag": "latest",
-                   "precreate": true
-                },
-                {
                     "name": "ubuntu-jq-install",
                     "tag": "latest",
                     "precreate": true
@@ -303,6 +308,11 @@
                     "name": "ubuntu-expect-install",
                     "tag": "latest",
                     "precreate": true
+                },
+                {
+                   "name": "open-ssh-install",
+                   "tag": "latest",
+                   "precreate": true
                 },
                 {
                     "name": "open-ssh-folder-for-keys-create",
