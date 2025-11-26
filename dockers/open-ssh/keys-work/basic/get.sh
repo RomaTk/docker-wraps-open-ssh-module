@@ -3,9 +3,15 @@
 function main {
     local user="$1"
     local comment="$2"
+    local config_file_path="$3"
     local output
     local current_file
     local current_dir
+
+    if [[ -z "$user" ]]; then
+        echo "User must not be empty" >&2
+        exit 1
+    fi
 
     current_file="${BASH_SOURCE[0]}"
     if [ -z "$current_file" ]; then
@@ -13,21 +19,24 @@ function main {
         exit 1
     fi
 
-    current_dir=$(dirname "$current_file")
-    if [ -z "$current_dir" ]; then
-        echo "Cannot determine current directory" >&2
-        exit 1
-    fi
+    if [[ -z "$config_file_path" ]]; then
+        current_dir=$(dirname "$current_file")
+        if [ -z "$current_dir" ]; then
+            echo "Cannot determine current directory" >&2
+            exit 1
+        fi
 
-    if [[ -z "$user" ]]; then
-        echo "User must not be empty" >&2
-        exit 1
-    fi
-
-    source "$current_dir/config.cfg"
-    if [ $? -ne 0 ]; then
-        echo "Cannot source config.cfg" >&2
-        exit 1
+        source "$current_dir/config.cfg"
+        if [ $? -ne 0 ]; then
+            echo "Cannot source config.cfg" >&2
+            exit 1
+        fi
+    else
+        source "$config_file_path"
+        if [ $? -ne 0 ]; then
+            echo "Cannot source $config_file_path" >&2
+            exit 1
+        fi
     fi
 
     if [ -z "$KEYS_CONFIGURATION_FILE" ]; then
