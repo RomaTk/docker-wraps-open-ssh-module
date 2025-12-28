@@ -257,11 +257,6 @@
                     "name": "open-ssh-create-sshd-user",
                     "tag": "latest",
                     "precreate": true
-                },
-                {
-                    "name": "open-ssh-add-public-keys",
-                    "tag": "latest",
-                    "precreate": true
                 }
             ],
             "dockerfile": "./dockers/open-ssh/sshd/basic/Dockerfile",
@@ -365,6 +360,42 @@
                         "(source /working-env/open-ssh/connect-via-ssh/interactive/connect.sh && main)"
                     ]
                 }
+            }
+        },
+        "open-ssh-sshd-basic-with-public-keys": {
+            "basedOn": [
+                {
+                    "name": "open-ssh-sshd-basic",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
+                    "name": "open-ssh-add-public-keys",
+                    "tag": "latest",
+                    "precreate": true
+                }
+            ],
+            "dockerfile": "./dockers/empty/Dockerfile",
+            "build": {
+                "context": "./dockers/empty"
+            }
+        },
+        "open-ssh-sshd-interactive-with-public-keys": {
+            "basedOn": [
+                {
+                    "name": "open-ssh-sshd-basic-with-public-keys",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
+                    "name": "open-ssh-sshd-interactive",
+                    "tag": "latest",
+                    "precreate": true
+                }
+            ],
+            "dockerfile": "./dockers/empty/Dockerfile",
+            "build": {
+                "context": "./dockers/empty"
             }
         }
     }
