@@ -9,7 +9,7 @@ function main {
         echo "Error: Cannot determine the current script file." >&2
         exit 1
     fi
-    current_dir="$(dirname "$0")"
+    current_dir="$(dirname "$current_file")"
     if [ -z "$current_dir" ]; then
         echo "Error: Cannot determine the current script directory." >&2
         exit 1
