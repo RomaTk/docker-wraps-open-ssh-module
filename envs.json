@@ -372,13 +372,27 @@
                 {
                     "name": "open-ssh-add-public-keys",
                     "tag": "latest",
-                    "precreate": true
+                    "precreate": true,
+                    "asAbstract": true
                 }
             ],
-            "dockerfile": "./dockers/empty/Dockerfile",
             "build": {
-                "context": "./dockers/empty"
-            }
+                "context": "./dockers/open-ssh/public-keys-add",
+                "run": {
+                    "after": [
+                        {
+                            "action": "remove",
+                            "basedOnScope": "open-ssh-add-public-keys",
+                            "value": "(source \"./env-scripts/not-by-wrap-name/backups/make.sh\" && main \"$(./envs.sh get name image open-ssh-add-public-keys)\")"
+                        },
+                        "(source \"./env-scripts/not-by-wrap-name/backups/make.sh\" && main \"$(./envs.sh get name image open-ssh-sshd-basic-with-public-keys)\")"
+                    ]
+                }
+            },
+            "clean": [
+                "(source ./env-scripts/open-ssh/public-keys-add/clean.sh && main \"./dockers/open-ssh\")",
+                "(source \"./env-scripts/not-by-wrap-name/backups/clean.sh\" && main \"$(./envs.sh get name image open-ssh-sshd-basic-with-public-keys)\")"
+            ]
         },
         "open-ssh-sshd-interactive-with-public-keys": {
             "basedOn": [
@@ -390,13 +404,10 @@
                 {
                     "name": "open-ssh-sshd-interactive",
                     "tag": "latest",
-                    "precreate": true
+                    "precreate": true,
+                    "asAbstract": true
                 }
-            ],
-            "dockerfile": "./dockers/empty/Dockerfile",
-            "build": {
-                "context": "./dockers/empty"
-            }
+            ]
         }
     }
 }
