@@ -77,7 +77,8 @@
                 "context": "./dockers/open-ssh/download/with-configs"
             },
             "clean": [
-                "(source ./env-scripts/not-by-wrap-name/install-some-util/clean.sh && main \"./dockers/open-ssh\" \"download\")"
+                "(source ./env-scripts/not-by-wrap-name/install-some-util/clean.sh && main \"./dockers/open-ssh\" \"download\")",
+                "(source ./env-scripts/not-by-wrap-name/install-some-util/clean.sh && main \"./dockers/open-ssh\" \"install\")"
             ]
         },
         "open-ssh-install": {
@@ -103,8 +104,7 @@
                 }
             },
             "clean": [
-                "(source \"./env-scripts/not-by-wrap-name/backups/clean.sh\" && main \"$(./envs.sh get name image open-ssh-install)\")",
-                "(source ./env-scripts/not-by-wrap-name/install-some-util/clean.sh && main \"./dockers/open-ssh\" \"install\")"
+                "(source \"./env-scripts/not-by-wrap-name/backups/clean.sh\" && main \"$(./envs.sh get name image open-ssh-install)\")"
             ]
         },
         "open-ssh-folder-for-keys-create": {
