@@ -9,18 +9,22 @@ git submodule add https://github.com/RomaTk/docker-wraps-open-ssh-module.git mod
 
 ## Wraps:
 After that you will have the following wraps available:
-- `open-ssh-get-latest-version`
-- `open-ssh-download-without-configs`
-- `open-ssh-download-with-configs`
-- `open-ssh-install`
-- `open-ssh-keys-work-basic`
-- `open-ssh-keys-work-interactive`
-- `open-ssh-create-sshd-user`
-- `open-ssh-add-public-keys`
-- `open-ssh-sshd-basic`
-- `open-ssh-sshd-interactive`
-- `open-ssh-connect-via-ssh-basic`
-- `open-ssh-connect-via-ssh-interactive`
+- [File - envs.json](./envs.json)
+    - `open-ssh-get-latest-version`
+    - `open-ssh-download-without-configs`
+    - `open-ssh-download-with-configs`
+    - `open-ssh-install`
+    - `open-ssh-folder-for-keys-create`
+    - `open-ssh-keys-work-basic`
+    - `open-ssh-keys-work-interactive`
+    - `open-ssh-create-sshd-user`
+    - `open-ssh-add-public-keys`
+    - `open-ssh-sshd-basic`
+    - `open-ssh-sshd-basic-with-public-keys`
+    - `open-ssh-sshd-interactive`
+    - `open-ssh-sshd-interactive-with-public-keys`
+    - `open-ssh-connect-via-ssh-basic`
+    - `open-ssh-connect-via-ssh-interactive`
 
 
 ## Creating keys
@@ -71,17 +75,12 @@ if no version is specified, latest stable version will be used.
 ## Requirements
 
 To use you need to have modules:
+- https://github.com/RomaTk/docker-wraps-backups-module.git
+    - This module will allow to avoid rebuilding images if they are already built.
+- https://github.com/RomaTk/docker-wraps-ubuntu-module.git
+    - This module will allow to have ubuntu image as base for open-ssh images.
+- https://github.com/RomaTk/docker-wraps-install-some-util-module.git
+    - This module will provide env-scripts for common way to install some utils in the docker wraps environment.
 - https://github.com/RomaTk/docker-wraps-secrets-work-module.git
     - To implement `input-secrets` wrap, but you can create your own way to provide secrets.
-- https://github.com/RomaTk/docker-wraps-ubuntu-module.git
-    - To implement:
-        - `ubuntu-wget-install`
-        - `ubuntu-jq-install`
-        - `ubuntu-with-latest-packages`
-        - `ubuntu-gnupg-install`
-        - `ubuntu-user-work`
-        - `ubuntu-iproute2-install`
-        - `ubuntu-expect-install`
-        
-        , but you can create your own way
 
