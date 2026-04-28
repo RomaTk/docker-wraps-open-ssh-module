@@ -1,9 +1,20 @@
+#!/bin/bash
+
 function main {
     local user="$1"
     local comment="$2"
+    local passphrase="$3"
+    local config_file_path="$4"
     local output
+    local fd
+    local exit_code
     local current_file
     local current_dir
+
+    if [[ -z "$user" ]] || [[ -z "$passphrase" ]]; then
+        echo "User and passphrase must not be empty" >&2
+        exit 1
+    fi
 
     current_file="${BASH_SOURCE[0]}"
     if [ -z "$current_file" ]; then
@@ -17,15 +28,24 @@ function main {
         exit 1
     fi
 
-    if [[ -z "$user" ]]; then
-        echo "User must not be empty" >&2
-        exit 1
-    fi
+    if [[ -z "$config_file_path" ]]; then
+        current_dir=$(dirname "$current_file")
+        if [ -z "$current_dir" ]; then
+            echo "Cannot determine current directory" >&2
+            exit 1
+        fi
 
-    source "$current_dir/config.cfg"
-    if [ $? -ne 0 ]; then
-        echo "Cannot source config.cfg" >&2
-        exit 1
+        source "$current_dir/config.cfg"
+        if [ $? -ne 0 ]; then
+            echo "Cannot source config.cfg" >&2
+            exit 1
+        fi
+    else
+        source "$config_file_path"
+        if [ $? -ne 0 ]; then
+            echo "Cannot source $config_file_path" >&2
+            exit 1
+        fi
     fi
 
     if [ -z "$KEYS_CONFIGURATION_FILE" ]; then
@@ -53,13 +73,21 @@ function main {
         exit 1
     fi
 
-    output=$(flock -x "$KEYS_CONFIGURATION_FILE" -c "
-        bash -c '
-            source \"$current_file\" && mainWithoutFlock \"$user\" \"$comment\" \"$KEYS_CONFIGURATION_FILE\" \"$SSH_KEYS_DIR\" \"$KEYS_PASSPHRASES_FILE\"
-            exit \$?
-        '")
-    if [ $? -ne 0 ]; then
-        echo "Problem occurred within remove: $output" >&2
+    current_file="${BASH_SOURCE[0]}"
+
+    exec {fd}<> "$KEYS_CONFIGURATION_FILE"
+    flock -x "$fd"
+
+    output=$(
+        source "$current_file" && mainWithoutFlock "$user" "$comment" "$passphrase" "$KEYS_CONFIGURATION_FILE" "$SSH_KEYS_DIR" "$KEYS_PASSPHRASES_FILE"
+        exit $?
+    )
+    exit_code=$?
+
+    exec {fd}>&-
+
+    if [ $exit_code -ne 0 ]; then
+        echo "Problem occurred within create: $output" >&2
         exit 1
     fi
 
@@ -69,20 +97,22 @@ function main {
 function mainWithoutFlock {
     local user="$1"
     local comment="$2"
-    local configuration_file="$3"
-    local ssh_keys_dir="$4"
-    local passphrases_file="$5"
+    local passphrase="$3"
+    local configuration_file="$4"
+    local ssh_keys_dir="$5"
+    local passphrases_file="$6"
     local configuration_array
     local length
     local i
+    local index="-1"
     local existing_key
     local user_name
     local key_index
     local key_comment
     local passphrases_obj
 
-    if [[ -z "$user" ]]; then
-        echo "User must not be empty" >&2
+    if [[ -z "$user" ]] || [[ -z "$passphrase" ]]; then
+        echo "User and passphrase must not be empty" >&2
         exit 1
     fi
 
@@ -128,27 +158,28 @@ function mainWithoutFlock {
         fi
 
         if [[ "$user_name" == "$user" ]] && [[ "$key_comment" == "$comment" ]]; then
-            configuration_array=$(echo "$configuration_array" | jq -r "del(.[${i}])")
-            if [ $? -ne 0 ]; then
-                echo "Cannot delete user at index $i" >&2
-                exit 1
-            fi
+            echo "Owner '$user' with comment '$comment' already exists in the file" >&2
+            exit 1
+        fi
 
-            passphrases_obj=$(echo "$passphrases_obj" | jq -r "del(.\"$key_index\")")
-            if [ $? -ne 0 ]; then
-                echo "Cannot delete passphrase at index $key_index" >&2
-                exit 1
-            fi
-
-            (removeUsersKeys "$key_index" "$ssh_keys_dir")
-            if [ $? -ne 0 ]; then
-                echo "Cannot remove keys for user '$user'" >&2
-                exit 1
-            fi
-
-            break
+        if [[ "$index" == "-1" ]] && [[ "$i" != "$key_index" ]]; then
+            index="$i"
         fi
     done
+
+    if [[ "$index" == "-1" ]]; then
+        index="$length"
+    fi
+
+    configuration_array=$(echo "$configuration_array" | jq --arg user "$user" --arg index "$index" --arg comment "$comment" '. += [{
+        "user": $user,
+        "comment": $comment,
+        "index": $index
+    }]')
+    if [ $? -ne 0 ]; then
+        echo "Cannot add new user to array" >&2
+        exit 1
+    fi
 
     configuration_array=$(echo "$configuration_array" | jq -r 'sort_by(.index | tonumber)')
     if [ $? -ne 0 ]; then
@@ -156,9 +187,17 @@ function mainWithoutFlock {
         exit 1
     fi
 
-    echo "$passphrases_obj" > "$passphrases_file"
+    passphrases_obj=$(echo "$passphrases_obj" | jq --arg index "$index" --arg passphrase "$passphrase" '. += {
+        ($index): $passphrase
+    }')
     if [ $? -ne 0 ]; then
-        echo "Cannot write passphrases object to file" >&2
+        echo "Cannot add new passphrase to object" >&2
+        exit 1
+    fi
+
+    ssh-keygen -t ed25519 -f "$ssh_keys_dir/$index" -C "$comment" -N "$passphrase"
+    if [ $? -ne 0 ]; then
+        echo "Cannot generate SSH key for user '$user'" >&2
         exit 1
     fi
 
@@ -168,38 +207,10 @@ function mainWithoutFlock {
         exit 1
     fi
 
-    exit 0
-}
-
-
-function removeUsersKeys {
-    local index="$1"
-    local ssh_keys_dir="$2"
-
-    if [ -z "$index" ]; then
-        echo "Index is empty" >&2
+    echo "$passphrases_obj" > "$passphrases_file"
+    if [ $? -ne 0 ]; then
+        echo "Cannot write passphrases object to file" >&2
         exit 1
-    fi
-
-    if [ ! -d "$ssh_keys_dir" ]; then
-        echo "Keys folder does not exist" >&2
-        exit 1
-    fi
-
-    if [ -f "$ssh_keys_dir/$index" ]; then
-        rm -f "$ssh_keys_dir/$index"
-        if [ $? -ne 0 ]; then
-            echo "Cannot remove private key for index $index" >&2
-            exit 1
-        fi
-    fi
-
-    if [ -f "$ssh_keys_dir/$index.pub" ]; then
-        rm -f "$ssh_keys_dir/$index.pub"
-        if [ $? -ne 0 ]; then
-            echo "Cannot remove public key for index $index" >&2
-            exit 1
-        fi
     fi
 
     exit 0

@@ -51,7 +51,7 @@ function main {
 
     last_action=$(source "$BASIC_DIR/create.sh" && main "$user" "$comment" "$passphrase")
     if [ $? -ne 0 ]; then
-        echo "Problem within createWithFlock: $last_action" >&2
+        echo "Problem within create: $last_action" >&2
         exit 1
     fi
 

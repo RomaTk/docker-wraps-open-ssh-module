@@ -77,7 +77,8 @@
                 "context": "./dockers/open-ssh/download/with-configs"
             },
             "clean": [
-                "(source ./env-scripts/not-by-wrap-name/install-some-util/clean.sh && main \"./dockers/open-ssh\" \"download\")"
+                "(source ./env-scripts/not-by-wrap-name/install-some-util/clean.sh && main \"./dockers/open-ssh\" \"download\")",
+                "(source ./env-scripts/not-by-wrap-name/install-some-util/clean.sh && main \"./dockers/open-ssh\" \"install\")"
             ]
         },
         "open-ssh-install": {
@@ -103,20 +104,19 @@
                 }
             },
             "clean": [
-                "(source \"./env-scripts/not-by-wrap-name/backups/clean.sh\" && main \"$(./envs.sh get name image open-ssh-install)\")",
-                "(source ./env-scripts/not-by-wrap-name/install-some-util/clean.sh && main \"./dockers/open-ssh\" \"install\")"
+                "(source \"./env-scripts/not-by-wrap-name/backups/clean.sh\" && main \"$(./envs.sh get name image open-ssh-install)\")"
             ]
         },
         "open-ssh-folder-for-keys-create": {
             "build": {
                 "run": {
                     "before": [
-                        "(source ./env-scripts/open-ssh/keys-creation/make-keys-folder.sh && main \"./secrets\" \"open-ssh/keys\")"
+                        "(source ./env-scripts/open-ssh/keys-work/make-keys-folder.sh && main \"./secrets\" \"open-ssh/keys\")"
                     ]
                 }
             }
         },
-        "open-ssh-keys-creation-basic": {
+        "open-ssh-keys-work-basic": {
             "basedOn": [
                 {
                     "name": "ubuntu-jq-install",
@@ -135,23 +135,23 @@
                     "asAbstract": true
                 }
             ],
-            "dockerfile": "./dockers/open-ssh/keys-creation/basic/Dockerfile",
+            "dockerfile": "./dockers/open-ssh/keys-work/basic/Dockerfile",
             "build": {
-                "context": "./dockers/open-ssh/keys-creation/basic"
+                "context": "./dockers/open-ssh/keys-work/basic"
             },
             "run": {
                 "volumes": [
                     {
-                        "destination": "/working-env/open-ssh/keys-creation/basic/keys",
+                        "destination": "/working-env/open-ssh/keys-work/basic/keys",
                         "source": "./secrets/open-ssh/keys"
                     }
                 ]
             }
         },
-        "open-ssh-keys-creation-interactive": {
+        "open-ssh-keys-work-interactive": {
             "basedOn": [
                 {
-                    "name": "open-ssh-keys-creation-basic",
+                    "name": "open-ssh-keys-work-basic",
                     "tag": "latest",
                     "precreate": true
                 },
@@ -162,9 +162,9 @@
                     "asAbstract": true
                 }
             ],
-            "dockerfile": "./dockers/open-ssh/keys-creation/interactive/Dockerfile",
+            "dockerfile": "./dockers/open-ssh/keys-work/interactive/Dockerfile",
             "build": {
-                "context": "./dockers/open-ssh/keys-creation/interactive"
+                "context": "./dockers/open-ssh/keys-work/interactive"
             },
             "run": {
                 "entrypoint": {
@@ -173,7 +173,7 @@
                         "-c"
                     ],
                     "commands": [
-                        "(source /working-env/open-ssh/keys-creation/interactive/main.sh && main)"
+                        "(source /working-env/open-ssh/keys-work/interactive/main.sh && main)"
                     ]
                 }
             }
@@ -239,17 +239,22 @@
                     "precreate": true
                 },
                 {
+                    "name": "ubuntu-jq-install",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
+                    "name": "ubuntu-gnupg-install",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
                     "name": "open-ssh-install",
                     "tag": "latest",
                     "precreate": true
                 },
                 {
                     "name": "open-ssh-create-sshd-user",
-                    "tag": "latest",
-                    "precreate": true
-                },
-                {
-                    "name": "open-ssh-add-public-keys",
                     "tag": "latest",
                     "precreate": true
                 }
@@ -290,11 +295,6 @@
         "open-ssh-connect-via-ssh-basic": {
             "basedOn": [
                 {
-                   "name": "open-ssh-install",
-                   "tag": "latest",
-                   "precreate": true
-                },
-                {
                     "name": "ubuntu-jq-install",
                     "tag": "latest",
                     "precreate": true
@@ -303,6 +303,11 @@
                     "name": "ubuntu-expect-install",
                     "tag": "latest",
                     "precreate": true
+                },
+                {
+                   "name": "open-ssh-install",
+                   "tag": "latest",
+                   "precreate": true
                 },
                 {
                     "name": "open-ssh-folder-for-keys-create",
@@ -356,6 +361,53 @@
                     ]
                 }
             }
+        },
+        "open-ssh-sshd-basic-with-public-keys": {
+            "basedOn": [
+                {
+                    "name": "open-ssh-sshd-basic",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
+                    "name": "open-ssh-add-public-keys",
+                    "tag": "latest",
+                    "precreate": true,
+                    "asAbstract": true
+                }
+            ],
+            "build": {
+                "context": "./dockers/open-ssh/public-keys-add",
+                "run": {
+                    "after": [
+                        {
+                            "action": "remove",
+                            "basedOnScope": "open-ssh-add-public-keys",
+                            "value": "(source \"./env-scripts/not-by-wrap-name/backups/make.sh\" && main \"$(./envs.sh get name image open-ssh-add-public-keys)\")"
+                        },
+                        "(source \"./env-scripts/not-by-wrap-name/backups/make.sh\" && main \"$(./envs.sh get name image open-ssh-sshd-basic-with-public-keys)\")"
+                    ]
+                }
+            },
+            "clean": [
+                "(source ./env-scripts/open-ssh/public-keys-add/clean.sh && main \"./dockers/open-ssh\")",
+                "(source \"./env-scripts/not-by-wrap-name/backups/clean.sh\" && main \"$(./envs.sh get name image open-ssh-sshd-basic-with-public-keys)\")"
+            ]
+        },
+        "open-ssh-sshd-interactive-with-public-keys": {
+            "basedOn": [
+                {
+                    "name": "open-ssh-sshd-basic-with-public-keys",
+                    "tag": "latest",
+                    "precreate": true
+                },
+                {
+                    "name": "open-ssh-sshd-interactive",
+                    "tag": "latest",
+                    "precreate": true,
+                    "asAbstract": true
+                }
+            ]
         }
     }
 }

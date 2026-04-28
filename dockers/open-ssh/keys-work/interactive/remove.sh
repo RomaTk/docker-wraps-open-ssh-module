@@ -8,7 +8,7 @@ function main {
     local current_file
     local current_dir
 
-    echo "Please enter user (comment):"
+    echo "Please enter user:"
     read user
     if [ -z "$user" ]; then
         echo "We do not allow empty user" >&2
@@ -44,7 +44,7 @@ function main {
 
     last_action=$(source "$BASIC_DIR/remove.sh" && main "$user" "$comment")
     if [ $? -ne 0 ]; then
-        echo "Problem within removeWithFlock: $last_action" >&2
+        echo "Problem within remove: $last_action" >&2
         exit 1
     fi
 

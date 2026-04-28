@@ -216,7 +216,8 @@ function addSSHKeyToAgent {
     local key_was_added="true"
 
     while true; do
-        (eval "$script_folder/ssh-agent-expect.sh \"$key_file\" \"$passphrase\"") > /dev/null 2>&1
+        #SSH_ASKPASS_REQUIRE=never to prevent ssh-add from trying to use SSH_ASKPASS
+        (eval "SSH_ASKPASS_REQUIRE=never $script_folder/ssh-agent-expect.sh \"$key_file\" \"$passphrase\"") > /dev/null 2>&1
         exit_code=$?
         if [ $exit_code -eq 2 ]; then
             if [ $try_count -gt 0 ]; then
