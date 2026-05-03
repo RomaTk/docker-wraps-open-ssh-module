@@ -6,3 +6,4 @@
 
 /dockers/open-ssh/open-ssh
 /env-scripts/open-ssh/open-ssh
+/secrets-template/open-ssh/open-ssh

@@ -17,6 +17,9 @@ function main() {
     ln -sf "../$current_dir/env-scripts/open-ssh" "../../env-scripts/open-ssh"
     [ $? -ne 0 ] && exit 1
 
+    ln -sf "../$current_dir/secrets-template/open-ssh" "../../secrets-template/open-ssh"
+    [ $? -ne 0 ] && exit 1
+
     ln -sf "../$current_dir/envs.json" "../../env-jsons/open-ssh.json"
     [ $? -ne 0 ] && exit 1
 
